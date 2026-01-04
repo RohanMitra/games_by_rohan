@@ -668,35 +668,37 @@ class _ShogiPageState extends State<ShogiPage> {
           Row(children: [Text("AI"), Switch(value: isAI, onChanged: (v) => setState(() => isAI = v))]),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Gote Hand (Top)
-            _buildHandArea(goteHand, Player.gote),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: AspectRatio(
-                aspectRatio: 1.0,
-                child: GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 9,
-                    crossAxisSpacing: 1,
-                    mainAxisSpacing: 1,
+      body: Column(
+        children: [
+          // Gote Hand (Top)
+          _buildHandArea(goteHand, Player.gote),
+          Expanded(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: AspectRatio(
+                  aspectRatio: 1.0,
+                  child: GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 9,
+                      crossAxisSpacing: 1,
+                      mainAxisSpacing: 1,
+                    ),
+                    itemCount: 81,
+                    itemBuilder: (context, index) {
+                      int r = index ~/ 9;
+                      int c = index % 9;
+                      return _buildCell(r, c);
+                    },
                   ),
-                  itemCount: 81,
-                  itemBuilder: (context, index) {
-                    int r = index ~/ 9;
-                    int c = index % 9;
-                    return _buildCell(r, c);
-                  },
                 ),
               ),
             ),
-            // Sente Hand (Bottom)
-            _buildHandArea(senteHand, Player.sente),
-          ],
-        ),
+          ),
+          // Sente Hand (Bottom)
+          _buildHandArea(senteHand, Player.sente),
+        ],
       ),
     );
   }

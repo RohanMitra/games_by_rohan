@@ -137,7 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         label: 'Go',
                       ),
                       BottomNavigationBarItem(
-                        icon: Icon(Icons.grid_4x4),
+                        icon: ImageIcon(AssetImage('assets/images/chess/Pawn.png')),
                         label: 'Chess',
                       ),
                       BottomNavigationBarItem(
@@ -195,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 label: Text('Go'),
                               ),
                               NavigationRailDestination(
-                                icon: Icon(Icons.grid_4x4),
+                                icon: ImageIcon(AssetImage('assets/images/chess/Pawn.png')),
                                 label: Text('Chess'),
                               ),
                               NavigationRailDestination(
