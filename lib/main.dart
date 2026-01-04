@@ -157,69 +157,62 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           } else {
             return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SafeArea(
-                  child: _showRail
-                      ? NavigationRail(
-                          leading: Align(
-                            alignment: Alignment.centerLeft,
-                            child: IconButton(
-                              icon: Icon(Icons.menu),
-                              onPressed: () {
-                                setState(() {
-                                  _showRail = !_showRail;
-                                });
-                              },
-                            ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.menu),
+                        onPressed: () {
+                          setState(() {
+                            _showRail = !_showRail;
+                          });
+                        },
+                      ),
+                      if (_showRail)
+                        Expanded(
+                          child: NavigationRail(
+                            selectedIconTheme: IconThemeData(color: Colors.blue),
+                            unselectedIconTheme: IconThemeData(color: Colors.grey),
+                            extended: constraints.maxWidth >= 800,
+                            destinations: [
+                              NavigationRailDestination(
+                                icon: Icon(Icons.home),
+                                label: Text('Home'),
+                              ),
+                              NavigationRailDestination(
+                                icon: Icon(Icons.favorite),
+                                label: Text('Favorites'),
+                              ),
+                              NavigationRailDestination(
+                                icon: Icon(Icons.grid_on),
+                                label: Text('Shogi'),
+                              ),
+                              NavigationRailDestination(
+                                icon: Icon(Icons.circle_outlined),
+                                label: Text('Go'),
+                              ),
+                              NavigationRailDestination(
+                                icon: Icon(Icons.grid_4x4),
+                                label: Text('Chess'),
+                              ),
+                              NavigationRailDestination(
+                                icon: Icon(Icons.circle),
+                                label: Text('Checkers'),
+                              ),
+                            ],
+                            selectedIndex: selectedIndex,
+                            onDestinationSelected: (value) {
+                              setState(() {
+                                selectedIndex = value;
+                              });
+                            },
                           ),
-                          selectedIconTheme: IconThemeData(color: Colors.blue),
-                          unselectedIconTheme: IconThemeData(color: Colors.grey),
-                          extended: constraints.maxWidth >= 800,
-                          destinations: [
-                            NavigationRailDestination(
-                              icon: Icon(Icons.home),
-                              label: Text('Home'),
-                            ),
-                            NavigationRailDestination(
-                              icon: Icon(Icons.favorite),
-                              label: Text('Favorites'),
-                            ),
-                            NavigationRailDestination(
-                              icon: Icon(Icons.grid_on),
-                              label: Text('Shogi'),
-                            ),
-                            NavigationRailDestination(
-                              icon: Icon(Icons.circle_outlined),
-                              label: Text('Go'),
-                            ),
-                            NavigationRailDestination(
-                              icon: Icon(Icons.grid_4x4),
-                              label: Text('Chess'),
-                            ),
-                            NavigationRailDestination(
-                              icon: Icon(Icons.circle),
-                              label: Text('Checkers'),
-                            ),
-                          ],
-                          selectedIndex: selectedIndex,
-                          onDestinationSelected: (value) {
-                            setState(() {
-                              selectedIndex = value;
-                            });
-                          },
-                        )
-                      : Column(
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.menu),
-                              onPressed: () {
-                                setState(() {
-                                  _showRail = !_showRail;
-                                });
-                              },
-                            ),
-                          ],
                         ),
+                    ],
+                  ),
                 ),
                 Expanded(child: mainArea),
               ],
