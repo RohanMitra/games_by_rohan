@@ -75,6 +75,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   var selectedIndex = 0;
   var _showRail = true;
+  final GlobalKey _mainAreaKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -105,6 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The container for the current page, with its background color
     // and subtle switching animation.
     var mainArea = ColoredBox(
+      key: _mainAreaKey,
       color: colorScheme.surfaceContainerHighest,
       child: AnimatedSwitcher(
         duration: Duration(milliseconds: 200),
