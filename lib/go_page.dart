@@ -9,7 +9,7 @@ class GoPage extends StatefulWidget {
 }
 
 class GoPageState extends State<GoPage> {
-  static const int boardSize = 19;
+  int boardSize = 19;
   static const int empty = 0;
   static const int black = 1;
   static const int white = 2;
@@ -273,6 +273,18 @@ class GoPageState extends State<GoPage> {
         backgroundColor: colorScheme.inversePrimary,
         title: Text('Go (Baduk) - ${turn % 2 == 0 ? "Black" : "White"}\'s Turn'),
         actions: [
+          DropdownButton<int>(
+            value: boardSize,
+            items: [9, 13, 19].map((s) => DropdownMenuItem(value: s, child: Text("${s}x$s"))).toList(),
+            onChanged: (val) {
+              if (val != null) {
+                setState(() {
+                  boardSize = val;
+                  _resetGame();
+                });
+              }
+            },
+          ),
           Row(children: [Text("AI"), Switch(value: isAI, onChanged: (v) => setState(() => isAI = v))]),
           TextButton(
             onPressed: _passTurn,
@@ -389,8 +401,15 @@ class GoCellPainter extends CustomPainter {
 
     // Draw Star Points (Hoshi)
     // Standard 19x19 star points are at 3, 9, 15 (0-indexed)
-    List<int> stars = [3, 9, 15];
-    if (stars.contains(row) && stars.contains(col)) {
+    bool isStar = false;
+    if (boardSize == 19) {
+      isStar = [3, 9, 15].contains(row) && [3, 9, 15].contains(col);
+    } else if (boardSize == 13) {
+      isStar = ([3, 9].contains(row) && [3, 9].contains(col)) || (row == 6 && col == 6);
+    } else if (boardSize == 9) {
+      isStar = ([2, 6].contains(row) && [2, 6].contains(col)) || (row == 4 && col == 4);
+    }
+    if (isStar) {
       canvas.drawCircle(Offset(cx, cy), 3.0, Paint()..color = lineColor..style = PaintingStyle.fill);
     }
 
@@ -442,9 +461,10 @@ class MctsNode {
   MctsNode({required this.board, required this.playerToMove, this.parent, this.move}) {
     // Initialize untried moves
     // For simplicity, pick 50 random empty spots to reduce branching factor
+    int size = board.length;
     List<Point<int>> allEmpty = [];
-    for (int r = 0; r < 19; r++) {
-      for (int c = 0; c < 19; c++) {
+    for (int r = 0; r < size; r++) {
+      for (int c = 0; c < size; c++) {
         if (board[r][c] == 0) allEmpty.add(Point(r, c));
       }
     }
@@ -466,7 +486,8 @@ class MctsNode {
     Point<int> m = untriedMoves.removeLast();
     
     // Create new board state
-    List<List<int>> nextBoard = List.generate(19, (i) => List.from(board[i]));
+    int size = board.length;
+    List<List<int>> nextBoard = List.generate(size, (i) => List.from(board[i]));
     int result = game._makeMove(nextBoard, playerToMove, m.x, m.y, checkKo: false);
     
     // If move was invalid (e.g. suicide), just return self (skip this move)
@@ -482,14 +503,15 @@ class MctsNode {
   }
 
   int simulate(GoPageState game, int depth) {
-    List<List<int>> simBoard = List.generate(19, (i) => List.from(board[i]));
+    int size = board.length;
+    List<List<int>> simBoard = List.generate(size, (i) => List.from(board[i]));
     int currentPlayer = playerToMove;
     
     for (int d = 0; d < depth; d++) {
       // Random move
       List<Point<int>> emptySpots = [];
-      for(int r=0; r<19; r++) {
-        for(int c=0; c<19; c++) {
+      for(int r=0; r<size; r++) {
+        for(int c=0; c<size; c++) {
           if (simBoard[r][c] == 0) emptySpots.add(Point(r, c));
         }
       }
