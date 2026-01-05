@@ -2,10 +2,12 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:games_by_rohan/checkers_page.dart';
 import 'package:games_by_rohan/chess_page.dart';
+import 'package:games_by_rohan/connect4_page.dart';
 import 'package:games_by_rohan/favorites_page.dart';
 import 'package:games_by_rohan/generator_page.dart';
 import 'package:games_by_rohan/go_page.dart';
 import 'package:games_by_rohan/shogi_page.dart';
+import 'package:games_by_rohan/2048_page.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -92,6 +94,10 @@ class _MyHomePageState extends State<MyHomePage> {
         page = ChessPage();
       case 5:
         page = CheckersPage();
+      case 6:
+        page = Connect4Page();
+      case 7:
+        page = Game2048Page();
       default:
         throw UnimplementedError('no widget for $selectedIndex');
     }
@@ -143,6 +149,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       BottomNavigationBarItem(
                         icon: Icon(Icons.circle),
                         label: 'Checkers',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.grid_view),
+                        label: 'Connect 4',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.door_sliding),
+                        label: '2048',
                       ),
                     ],
                     currentIndex: selectedIndex,
@@ -201,6 +215,14 @@ class _MyHomePageState extends State<MyHomePage> {
                               NavigationRailDestination(
                                 icon: Icon(Icons.circle),
                                 label: Text('Checkers'),
+                              ),
+                              NavigationRailDestination(
+                                icon: Icon(Icons.grid_view),
+                                label: Text('Connect 4'),
+                              ),
+                              NavigationRailDestination(
+                                icon: Icon(Icons.door_sliding),
+                                label: Text('2048'),
                               ),
                             ],
                             selectedIndex: selectedIndex,
