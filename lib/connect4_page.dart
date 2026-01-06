@@ -177,9 +177,13 @@ class _Connect4PageState extends State<Connect4Page> {
     int countEmpty = window.where((p) => p == 0).length;
     int countOpp = window.where((p) => p == oppPiece).length;
 
-    if (countPiece == 4) score += 100;
-    else if (countPiece == 3 && countEmpty == 1) score += 5;
-    else if (countPiece == 2 && countEmpty == 2) score += 2;
+    if (countPiece == 4) {
+      score += 100;
+    } else if (countPiece == 3 && countEmpty == 1) {
+      score += 5;
+    } else if (countPiece == 2 && countEmpty == 2) {
+      score += 2;
+    }
 
     if (countOpp == 3 && countEmpty == 1) score -= 4;
 

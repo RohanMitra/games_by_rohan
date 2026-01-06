@@ -7,7 +7,7 @@ import 'package:games_by_rohan/favorites_page.dart';
 import 'package:games_by_rohan/generator_page.dart';
 import 'package:games_by_rohan/go_page.dart';
 import 'package:games_by_rohan/shogi_page.dart';
-import 'package:games_by_rohan/2048_page.dart';
+import 'package:games_by_rohan/game_2048_page.dart';
 import 'package:provider/provider.dart';
 
 void main() {
