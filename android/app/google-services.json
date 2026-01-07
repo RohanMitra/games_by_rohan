@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "720552281748",
+    "project_id": "test-project-dabac",
+    "storage_bucket": "test-project-dabac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:720552281748:android:c7c751df598d1416f65681",
+        "android_client_info": {
+          "package_name": "com.example.flutter_firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxlifEzGlBXLahPwIJHFWDU9EW0Je49EA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:720552281748:android:1cba01714887d8ecf65681",
+        "android_client_info": {
+          "package_name": "com.example.games_by_rohan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxlifEzGlBXLahPwIJHFWDU9EW0Je49EA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
