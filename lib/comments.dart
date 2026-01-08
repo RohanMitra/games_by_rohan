@@ -88,10 +88,18 @@ class _GameCommentSectionState extends State<GameCommentSection> {
                 itemCount: data.size,
                 itemBuilder: (context, index) {
                   var message = data.docs[index];
+                  final isCurrentUser =
+                      FirebaseAuth.instance.currentUser?.uid == message['userId'];
                   return ListTile(
                     leading: const Icon(Icons.person),
                     title: Text(message['name']),
                     subtitle: Text(message['text']),
+                    trailing: isCurrentUser
+                        ? IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () => message.reference.delete(),
+                          )
+                        : null,
                   );
                 },
               );
