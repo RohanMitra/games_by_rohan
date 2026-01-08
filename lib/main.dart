@@ -1,3 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:games_by_rohan/checkers_page.dart';
@@ -9,8 +12,16 @@ import 'package:games_by_rohan/go_page.dart';
 import 'package:games_by_rohan/shogi_page.dart';
 import 'package:games_by_rohan/game_2048_page.dart';
 import 'package:provider/provider.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  FirebaseUIAuth.configureProviders([
+    EmailAuthProvider(),
+  ]);
   runApp(MyApp());
 }
 
@@ -99,6 +110,8 @@ class _MyHomePageState extends State<MyHomePage> {
         page = Connect4Page();
       case 7:
         page = Game2048Page();
+      case 8:
+        page = const AuthGate();
       default:
         throw UnimplementedError('no widget for $selectedIndex');
     }
@@ -159,6 +172,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       BottomNavigationBarItem(
                         icon: Icon(Icons.door_sliding),
                         label: '2048',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(Icons.account_circle),
+                        label: 'Profile',
                       ),
                     ],
                     currentIndex: selectedIndex,
@@ -226,6 +243,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                 icon: Icon(Icons.door_sliding),
                                 label: Text('2048'),
                               ),
+                              NavigationRailDestination(
+                                icon: Icon(Icons.account_circle),
+                                label: Text('Profile'),
+                              ),
                             ],
                             selectedIndex: selectedIndex,
                             onDestinationSelected: (value) {
@@ -244,6 +265,31 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         },
       ),
+    );
+  }
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return SignInScreen(
+            providers: [
+              EmailAuthProvider(),
+            ],
+          );
+        }
+        return ProfileScreen(
+          providers: [
+            EmailAuthProvider(),
+          ],
+        );
+      },
     );
   }
 }
