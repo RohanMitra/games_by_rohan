@@ -12,6 +12,7 @@ import 'package:games_by_rohan/go_page.dart';
 import 'package:games_by_rohan/shogi_page.dart';
 import 'package:games_by_rohan/game_2048_page.dart';
 import 'package:provider/provider.dart';
+import 'comments.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -99,17 +100,17 @@ class _MyHomePageState extends State<MyHomePage> {
       case 1:
         page = FavoritesPage();
       case 2:
-        page = ShogiPage();
+        page = GameWithComments(gameId: 'shogi', child: ShogiPage());
       case 3:
-        page = GoPage();
+        page = GameWithComments(gameId: 'go', child: GoPage());
       case 4:
-        page = ChessPage();
+        page = GameWithComments(gameId: 'chess', child: ChessPage());
       case 5:
-        page = CheckersPage();
+        page = GameWithComments(gameId: 'checkers', child: CheckersPage());
       case 6:
-        page = Connect4Page();
+        page = GameWithComments(gameId: 'connect4', child: Connect4Page());
       case 7:
-        page = Game2048Page();
+        page = GameWithComments(gameId: '2048', child: Game2048Page());
       case 8:
         page = const AuthGate();
       default:
