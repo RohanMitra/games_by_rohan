@@ -43,3 +43,6 @@ flutter:
     - assets/images/shogi/
     - assets/images/chess/
     - assets/images/checkers/
+    - assets/images/background/Windrunners.jpg
+    - assets/images/background/Skybreakers.jpg
+    - assets/images/background/Truthseeker.jpg

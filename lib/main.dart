@@ -1,11 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:games_by_rohan/checkers_page.dart';
 import 'package:games_by_rohan/chess_page.dart';
 import 'package:games_by_rohan/connect4_page.dart';
-import 'package:games_by_rohan/favorites_page.dart';
 import 'package:games_by_rohan/generator_page.dart';
 import 'package:games_by_rohan/go_page.dart';
 import 'package:games_by_rohan/shogi_page.dart';
@@ -41,35 +39,6 @@ class MyApp extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
-  var history = <WordPair>[];
-
-  GlobalKey? historyListKey;
-
-  void getNext() {
-    history.insert(0, current);
-    var animatedList = historyListKey?.currentState as AnimatedListState?;
-    animatedList?.insertItem(0);
-    current = WordPair.random();
-    notifyListeners();
-  }
-
-  var favorites = <WordPair>[];
-
-  void toggleFavorite([WordPair? pair]) {
-    pair = pair ?? current;
-    if (favorites.contains(pair)) {
-      favorites.remove(pair);
-    } else {
-      favorites.add(pair);
-    }
-    notifyListeners();
-  }
-
-  void removeFavorite(WordPair pair) {
-    favorites.remove(pair);
-    notifyListeners();
-  }
 
   String? username;
   List<String> allowedGames = [];
@@ -135,7 +104,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     var allItems = [
       _PageItem('Home', Icon(Icons.home), GeneratorPage()),
-      _PageItem('Favorites', Icon(Icons.favorite), FavoritesPage()),
       _PageItem('Shogi', Icon(Icons.grid_on), ShogiPage(), 'shogi'),
       _PageItem('Go', Icon(Icons.circle_outlined), GoPage(), 'go'),
       _PageItem('Chess', ImageIcon(AssetImage('assets/images/chess/Pawn.png')), ChessPage(), 'chess'),
@@ -254,45 +222,65 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
 
+    Widget content;
     if (appState.username != null) {
-      return Center(
+      content = Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Welcome, ${appState.username}!'),
+            Text(
+              'Welcome, ${appState.username}!',
+              style: const TextStyle(color: Colors.white),
+            ),
             SizedBox(height: 10),
             ElevatedButton(onPressed: appState.logout, child: Text('Logout')),
           ],
         ),
       );
-    }
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (widget.message != null) Text(widget.message!),
-            TextField(
-              controller: _controller,
-              decoration: InputDecoration(labelText: 'Name'),
-            ),
-            SizedBox(height: 10),
-            if (appState.isLoading)
-              CircularProgressIndicator()
-            else
-              ElevatedButton(
-                onPressed: () {
-                  appState.login(_controller.text);
-                },
-                child: Text('Login'),
+    } else {
+      content = Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.message != null) Text(widget.message!),
+              TextField(
+                controller: _controller,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  labelStyle: TextStyle(color: Colors.white),
+                ),
               ),
-            if (appState.errorMessage != null)
-              Text(appState.errorMessage!, style: TextStyle(color: Colors.red)),
-          ],
+              SizedBox(height: 10),
+              if (appState.isLoading)
+                CircularProgressIndicator()
+              else
+                ElevatedButton(
+                  onPressed: () {
+                    appState.login(_controller.text);
+                  },
+                  child: Text('Login'),
+                ),
+              if (appState.errorMessage != null)
+                Text(appState.errorMessage!, style: TextStyle(color: Colors.red)),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    }
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/background/Skybreakers.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        content,
+      ],
+    );  }
   }
-}
