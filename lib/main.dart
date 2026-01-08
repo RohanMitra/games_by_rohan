@@ -1,6 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:games_by_rohan/checkers_page.dart';
@@ -12,7 +11,6 @@ import 'package:games_by_rohan/go_page.dart';
 import 'package:games_by_rohan/shogi_page.dart';
 import 'package:games_by_rohan/game_2048_page.dart';
 import 'package:provider/provider.dart';
-import 'comments.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -20,9 +18,6 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  FirebaseUIAuth.configureProviders([
-    EmailAuthProvider(),
-  ]);
   runApp(MyApp());
 }
 
@@ -75,6 +70,42 @@ class MyAppState extends ChangeNotifier {
     favorites.remove(pair);
     notifyListeners();
   }
+
+  String? username;
+  List<String> allowedGames = [];
+  bool isLoading = false;
+  String? errorMessage;
+
+  Future<void> login(String user) async {
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('username', isEqualTo: user)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        username = user;
+        allowedGames = List<String>.from(snapshot.docs.first.data()['allowed_games'] ?? []);
+      } else {
+        errorMessage = 'User not found';
+      }
+    } catch (e) {
+      errorMessage = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void logout() {
+    username = null;
+    allowedGames = [];
+    notifyListeners();
+  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -82,6 +113,14 @@ class MyHomePage extends StatefulWidget {
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _PageItem {
+  final String label;
+  final Widget icon;
+  final Widget page;
+  final String? gameId;
+  _PageItem(this.label, this.icon, this.page, [this.gameId]);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -92,30 +131,28 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     var colorScheme = Theme.of(context).colorScheme;
+    var appState = context.watch<MyAppState>();
 
-    Widget page;
-    switch (selectedIndex) {
-      case 0:
-        page = GeneratorPage();
-      case 1:
-        page = FavoritesPage();
-      case 2:
-        page = GameWithComments(gameId: 'shogi', child: ShogiPage());
-      case 3:
-        page = GameWithComments(gameId: 'go', child: GoPage());
-      case 4:
-        page = GameWithComments(gameId: 'chess', child: ChessPage());
-      case 5:
-        page = GameWithComments(gameId: 'checkers', child: CheckersPage());
-      case 6:
-        page = GameWithComments(gameId: 'connect4', child: Connect4Page());
-      case 7:
-        page = GameWithComments(gameId: '2048', child: Game2048Page());
-      case 8:
-        page = const AuthGate();
-      default:
-        throw UnimplementedError('no widget for $selectedIndex');
+    var allItems = [
+      _PageItem('Home', Icon(Icons.home), GeneratorPage()),
+      _PageItem('Favorites', Icon(Icons.favorite), FavoritesPage()),
+      _PageItem('Shogi', Icon(Icons.grid_on), ShogiPage(), 'shogi'),
+      _PageItem('Go', Icon(Icons.circle_outlined), GoPage(), 'go'),
+      _PageItem('Chess', ImageIcon(AssetImage('assets/images/chess/Pawn.png')), ChessPage(), 'chess'),
+      _PageItem('Checkers', Icon(Icons.circle), CheckersPage(), 'checkers'),
+      _PageItem('Connect 4', Icon(Icons.grid_view), Connect4Page(), 'connect4'),
+      _PageItem('2048', Icon(Icons.door_sliding), Game2048Page(), '2048'),
+      _PageItem('Profile', Icon(Icons.account_circle), const LoginPage()),
+    ];
+
+    var visibleItems = allItems.where((item) {
+      return item.gameId == null || (appState.username != null && appState.allowedGames.contains(item.gameId));
+    }).toList();
+
+    if (selectedIndex >= visibleItems.length) {
+      selectedIndex = visibleItems.length - 1;
     }
+    Widget page = visibleItems[selectedIndex].page;
 
     // The container for the current page, with its background color
     // and subtle switching animation.
@@ -141,44 +178,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: BottomNavigationBar(
                     selectedItemColor: Colors.blue,
                     unselectedItemColor: Colors.grey, 
-                    items: [
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.home),
-                        label: 'Home',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.favorite),
-                        label: 'Favorites',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.grid_on),
-                        label: 'Shogi',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.circle_outlined),
-                        label: 'Go',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: ImageIcon(AssetImage('assets/images/chess/Pawn.png')),
-                        label: 'Chess',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.circle),
-                        label: 'Checkers',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.grid_view),
-                        label: 'Connect 4',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.door_sliding),
-                        label: '2048',
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(Icons.account_circle),
-                        label: 'Profile',
-                      ),
-                    ],
+                    items: visibleItems.map((item) => BottomNavigationBarItem(
+                      icon: item.icon,
+                      label: item.label,
+                    )).toList(),
                     currentIndex: selectedIndex,
                     onTap: (value) {
                       setState(() {
@@ -211,44 +214,10 @@ class _MyHomePageState extends State<MyHomePage> {
                             selectedIconTheme: IconThemeData(color: Colors.blue),
                             unselectedIconTheme: IconThemeData(color: Colors.grey),
                             extended: constraints.maxWidth >= 800,
-                            destinations: [
-                              NavigationRailDestination(
-                                icon: Icon(Icons.home),
-                                label: Text('Home'),
-                              ),
-                              NavigationRailDestination(
-                                icon: Icon(Icons.favorite),
-                                label: Text('Favorites'),
-                              ),
-                              NavigationRailDestination(
-                                icon: Icon(Icons.grid_on),
-                                label: Text('Shogi'),
-                              ),
-                              NavigationRailDestination(
-                                icon: Icon(Icons.circle_outlined),
-                                label: Text('Go'),
-                              ),
-                              NavigationRailDestination(
-                                icon: ImageIcon(AssetImage('assets/images/chess/Pawn.png')),
-                                label: Text('Chess'),
-                              ),
-                              NavigationRailDestination(
-                                icon: Icon(Icons.circle),
-                                label: Text('Checkers'),
-                              ),
-                              NavigationRailDestination(
-                                icon: Icon(Icons.grid_view),
-                                label: Text('Connect 4'),
-                              ),
-                              NavigationRailDestination(
-                                icon: Icon(Icons.door_sliding),
-                                label: Text('2048'),
-                              ),
-                              NavigationRailDestination(
-                                icon: Icon(Icons.account_circle),
-                                label: Text('Profile'),
-                              ),
-                            ],
+                            destinations: visibleItems.map((item) => NavigationRailDestination(
+                              icon: item.icon,
+                              label: Text(item.label),
+                            )).toList(),
                             selectedIndex: selectedIndex,
                             onDestinationSelected: (value) {
                               setState(() {
@@ -270,27 +239,60 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
+class LoginPage extends StatefulWidget {
+  final String? message;
+  const LoginPage({super.key, this.message});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final _controller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return SignInScreen(
-            providers: [
-              EmailAuthProvider(),
-            ],
-          );
-        }
-        return ProfileScreen(
-          providers: [
-            EmailAuthProvider(),
+    var appState = context.watch<MyAppState>();
+
+    if (appState.username != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Welcome, ${appState.username}!'),
+            SizedBox(height: 10),
+            ElevatedButton(onPressed: appState.logout, child: Text('Logout')),
           ],
-        );
-      },
+        ),
+      );
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (widget.message != null) Text(widget.message!),
+            TextField(
+              controller: _controller,
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+            SizedBox(height: 10),
+            if (appState.isLoading)
+              CircularProgressIndicator()
+            else
+              ElevatedButton(
+                onPressed: () {
+                  appState.login(_controller.text);
+                },
+                child: Text('Login'),
+              ),
+            if (appState.errorMessage != null)
+              Text(appState.errorMessage!, style: TextStyle(color: Colors.red)),
+          ],
+        ),
+      ),
     );
   }
 }
